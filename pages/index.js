@@ -1,65 +1,65 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import styles from "../styles/Home.module.css";
+import Link from "next/link";
+import axios from "axios";
+import PassengerListItem from "../components/PassengerListItem";
+import { useEffect, useState } from "react";
 
-export default function Home() {
+export default function Home(props) {
+  const [size, setSize] = useState(10);
+  const [data, setData] = useState(props.data);
+
+  useEffect(() => {
+    async function fetchMore() {
+      const response = await axios(
+        `https://api.instantwebtools.net/v1/passenger?page=0&size=${size}`
+      );
+      setData(response.data.data);
+    }
+    fetchMore();
+  }, [size]);
+  async function fetchMore() {
+    const response = await axios(
+      `https://api.instantwebtools.net/v1/passenger?page=0&size=${size}`
+    );
+    data = response.data.dat;
+  }
+
   return (
     <div className={styles.container}>
       <Head>
-        <title>Create Next App</title>
+        <title>NextJs Passenger List App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+        <h1 className={styles.title}>Passenger List</h1>
 
         <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+          {data.map((item) => (
+            <PassengerListItem key={item._id} person={item} />
+          ))}
         </div>
-      </main>
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={() => {
+            setSize((pre) => pre + 10);
+          }}
+          className={styles.btn}
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+          Show More
+        </button>
+      </main>
     </div>
-  )
+  );
+}
+
+export async function getStaticProps() {
+  const response = await axios(
+    `https://api.instantwebtools.net/v1/passenger?page=0&size=10`
+  );
+  const { data } = response;
+  return {
+    props: data,
+  };
 }
